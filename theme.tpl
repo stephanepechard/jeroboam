@@ -6,7 +6,7 @@
         <meta name="author" content="Jeroboam" />
         <link href='http://fonts.googleapis.com/css?family=Lato:300|Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
         <style type="text/css">
-            body { background:#222; color:#DDD; margin:0; padding:0; border:0; width:100%; }
+            body { background:#222; color:#DDD; margin:0; padding:0; border:0; width:100%; font-family: 'Lato', sans-serif; }
             #container { clear:both; margin:0px; padding:0px; }
             #container:before, #container:after { content:""; display:table; }
             #container:after { clear:both; }
@@ -15,10 +15,10 @@
             #left ul { list-style:none; margin:2em 1em; padding:0; }
             #left ul li { margin-bottom:1em; list-style-position:inside; white-space: nowrap;
                           overflow: hidden; text-overflow: ellipsis; }
-            #left ul li a { color:#DDD; text-decoration:none; font-family: 'Lato', sans-serif; }
+            #left ul li a { color:#DDD; text-decoration:none; }
             header { text-align:center; font-size:30px;
                      font-family: 'Open Sans Condensed', sans-serif; }
-            footer { text-align:center; font-family: 'Lato', sans-serif; font-size:12px; }
+            footer { text-align:center; font-size:12px; }
             header a, footer a { color:#DDD; text-decoration:none; }
             #right { width: 76%; }
             @media only screen and (max-width: 480px) {
@@ -28,7 +28,6 @@
         </style>
     </head>
     <body>
-
 
     <div id="container">
 	    <div id="left" class="column">
@@ -48,10 +47,11 @@
 	    </div>
 	    <div id="right" class="column">
             <h2>Albums</h2>
-    	    <p>This layout is fully compatible with my <a href="http://matthewjamestaylor.com/blog/beautiful-css-centered-menus-no-hacks-full-cross-browser-support">cross-browser compatible centered menus</a>.</p>
+            % for picture in pictures:
+            <p>{{picture}}</p>
+            % end
 	    </div>
     </div>
 
-        <!--<script src="script.js" type="text/javascript" async=""></script>-->
-        </body>
-    </html>
+    </body>
+</html>

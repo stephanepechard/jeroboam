@@ -113,7 +113,8 @@ class Jeroboam:
         def index(path):
             pic_path = os.path.join(CACHE_DIR, path)
             if os.path.isdir(pic_path):
-                return dict(tree=self.tree)
+                pictures = [pic for pic in os.listdir(pic_path) if os.path.isfile(os.path.join(pic_path, pic))]
+                return dict(tree=self.tree, pictures=pictures)
             else:
                 full_path = os.path.join(self.config['DEFAULT']['directory'], path)
                 return static_file(os.path.basename(pic_path), root=os.path.dirname(full_path))
