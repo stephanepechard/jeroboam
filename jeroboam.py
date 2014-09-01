@@ -41,6 +41,7 @@ class Jeroboam:
     def __init__(self, logger):
         self.config = configparser.ConfigParser()
         self.log = logger
+        self.tree = []
 
     def init(self):
         self.get_config()
@@ -79,6 +80,7 @@ class Jeroboam:
             cache_dir = None
             if subdir.startswith(self.config['DEFAULT']['directory']):
                 length = len(self.config['DEFAULT']['directory']) + 1
+                self.tree.append(subdir[length:])
                 cache_dir = os.path.join(CACHE_DIR, subdir[length:])
                 if not os.path.exists(cache_dir):
                     os.mkdir(cache_dir)
@@ -104,26 +106,20 @@ class Jeroboam:
         self.log.info(str(nb_files) + " files found - " + str(nb_cache_files) + " files cached")
 
     def run_bottle(self):
-        from bottle import route, run, static_file
+        from bottle import route, run, static_file, view
 
         @route('/:path#.*#')
+        @view('theme')
         def index(path):
             pic_path = os.path.join(CACHE_DIR, path)
             if os.path.isdir(pic_path):
-                output = "<ul>"
-                for f in os.listdir(pic_path):
-                    output += '<li><a href="' + os.path.join(path, f) + '">' + os.path.join(path, f) + '</a></li>'
-
-                output += "<ul>"
-                return output
+                return dict(tree=self.tree)
             else:
                 full_path = os.path.join(self.config['DEFAULT']['directory'], path)
                 return static_file(os.path.basename(pic_path), root=os.path.dirname(full_path))
 
-        host = 'localhost'
-        port = 8888
-        subprocess.Popen(['open', 'http://' + host + ':' + str(port)])
-        run(host=host, port=port, debug=True)
+        subprocess.Popen(['open', 'http://127.0.0.1:8080/'])
+        run(debug=True)
 
 
 def log():
