@@ -97,7 +97,8 @@ class Jeroboam:
                         self.log.info("Caching: " + cache_path)
                         im = Image.open(path)
                         size = (int(self.config['DEFAULT']['thumbnail_size']),
-                                int(self.config['DEFAULT']['thumbnail_size']))
+                                int(int(self.config['DEFAULT']['thumbnail_size']) * 1.618))
+                        print(size)
                         im.thumbnail(size, Image.BICUBIC)
                         im.save(cache_path, im.format)
                         nb_cache_files += 1
@@ -108,12 +109,23 @@ class Jeroboam:
     def run_bottle(self):
         from bottle import route, run, static_file, view
 
+        @route('/imagelightbox.min.js')
+        def imagelightbox():
+            return static_file('imagelightbox.min.js', root=os.path.dirname(__file__))
+
+        @route('/cache/:path#.*#')
+        def cache(path):
+            pic_path = os.path.join(CACHE_DIR, path)
+            if not os.path.isdir(pic_path):
+                full_path = os.path.join(CACHE_DIR, path)
+                return static_file(os.path.basename(pic_path), root=os.path.dirname(full_path))
+
         @route('/:path#.*#')
         @view('theme')
         def index(path):
             pic_path = os.path.join(CACHE_DIR, path)
             if os.path.isdir(pic_path):
-                pictures = [pic for pic in os.listdir(pic_path) if os.path.isfile(os.path.join(pic_path, pic))]
+                pictures = [os.path.join(path, pic) for pic in os.listdir(pic_path) if os.path.isfile(os.path.join(pic_path, pic))]
                 return dict(tree=self.tree, pictures=pictures)
             else:
                 full_path = os.path.join(self.config['DEFAULT']['directory'], path)
