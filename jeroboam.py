@@ -44,7 +44,7 @@ APP_NAME = 'jeroboam'
 CONFIG_FILE = 'config.ini'
 CACHE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cache')
 THUMBNAIL_SIZE = '150'  # default
-
+SUPPORTED_EXTENSIONS = ['gif', 'jpg', 'jpeg', 'png']
 
 class Jeroboam:
     def __init__(self, logger):
@@ -84,6 +84,8 @@ class Jeroboam:
 
         nb_files = 0
         nb_cache_files = 0
+        size = (int(self.config.get('DEFAULT', 'thumbnail_size')),
+                int(int(self.config.get('DEFAULT', 'thumbnail_size')) * 1.618))
         for subdir, dirs, files in os.walk(self.config.get('DEFAULT', 'directory')):
             # recreate dirs
             cache_dir = None
@@ -97,21 +99,21 @@ class Jeroboam:
 
             # recreate thumbnails
             for file in files:
-                path = os.path.join(subdir, file)
-                cache_path = os.path.join(cache_dir, file)
-                mimetype = mimetypes.guess_type(file)
-                if mimetype and not os.path.exists(cache_path):
-                    filetype = mimetype[0].split('/')[0]
-                    if filetype == 'image':
-                        self.log.info("Caching: " + cache_path)
-                        im = Image.open(path)
-                        size = (int(self.config.get('DEFAULT', 'thumbnail_size')),
-                                int(int(self.config.get('DEFAULT', 'thumbnail_size')) * 1.618))
-                        print(size)
-                        im.thumbnail(size, Image.BICUBIC)
-                        im.save(cache_path, im.format)
-                        nb_cache_files += 1
-                nb_files += 1
+                if file.split('.')[-1] in SUPPORTED_EXTENSIONS:
+                    path = os.path.join(subdir, file)
+                    cache_path = os.path.join(cache_dir, file)
+                    mimetype = mimetypes.guess_type(file)
+                    if mimetype and not os.path.exists(cache_path):
+                        filetype = mimetype[0].split('/')[0]
+                        if filetype == 'image':
+                            self.log.info("Caching: " + cache_path)
+                            im = Image.open(path)
+                            im.thumbnail(size, Image.BICUBIC)
+                            im.save(cache_path, im.format)
+                            nb_cache_files += 1
+                    nb_files += 1
+                else:
+                    self.log.info('File format not supported for: ' + file)
 
         self.log.info(str(nb_files) + " files found - " + str(nb_cache_files) + " files cached")
 
