@@ -34,6 +34,10 @@ try:
     import configparser  # python3
 except ImportError:
     import ConfigParser as configparser  # python2
+try:
+   input = raw_input  # python2
+except NameError:
+   pass  # python3
 from PIL import Image
 # constants
 APP_NAME = 'jeroboam'
