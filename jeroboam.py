@@ -63,14 +63,14 @@ class Jeroboam:
         else:
             self.config.read(CONFIG_FILE)
             # check config integrity
-            if not os.path.exists(self.config['DEFAULT']['directory']):
+            if not os.path.exists(self.config.get('DEFAULT', 'directory')):
                 self.log.error("Picture directory do not exist. You need one to use Jeroboam.")
                 sys.exit(1)
 
     def create_config(self):
         directory = input("Please, specify the directory where your pictures are: ")
-        self.config['DEFAULT']['directory'] = directory
-        self.config['DEFAULT']['thumbnail_size'] = THUMBNAIL_SIZE
+        self.config.set('DEFAULT', 'directory', directory)
+        self.config.set('DEFAULT', 'thumbnail_size', THUMBNAIL_SIZE)
 
         with open(CONFIG_FILE, 'w') as configfile:
             self.config.write(configfile)
@@ -84,11 +84,11 @@ class Jeroboam:
 
         nb_files = 0
         nb_cache_files = 0
-        for subdir, dirs, files in os.walk(self.config['DEFAULT']['directory']):
+        for subdir, dirs, files in os.walk(self.config.get('DEFAULT', 'directory')):
             # recreate dirs
             cache_dir = None
-            if subdir.startswith(self.config['DEFAULT']['directory']):
-                length = len(self.config['DEFAULT']['directory']) + 1
+            if subdir.startswith(self.config.get('DEFAULT', 'directory')):
+                length = len(self.config.get('DEFAULT', 'directory')) + 1
                 self.tree.append(subdir[length:])
                 cache_dir = os.path.join(CACHE_DIR, subdir[length:])
                 if not os.path.exists(cache_dir):
@@ -105,8 +105,8 @@ class Jeroboam:
                     if filetype == 'image':
                         self.log.info("Caching: " + cache_path)
                         im = Image.open(path)
-                        size = (int(self.config['DEFAULT']['thumbnail_size']),
-                                int(int(self.config['DEFAULT']['thumbnail_size']) * 1.618))
+                        size = (int(self.config.get('DEFAULT', 'thumbnail_size')),
+                                int(int(self.config.get('DEFAULT', 'thumbnail_size')) * 1.618))
                         print(size)
                         im.thumbnail(size, Image.BICUBIC)
                         im.save(cache_path, im.format)
@@ -137,7 +137,7 @@ class Jeroboam:
                 pictures = [os.path.join(path, pic) for pic in os.listdir(pic_path) if os.path.isfile(os.path.join(pic_path, pic))]
                 return dict(tree=self.tree, pictures=pictures)
             else:
-                full_path = os.path.join(self.config['DEFAULT']['directory'], path)
+                full_path = os.path.join(self.config.get('DEFAULT', 'directory'), path)
                 return static_file(os.path.basename(pic_path), root=os.path.dirname(full_path))
 
         subprocess.Popen(['open', 'http://127.0.0.1:8080/'])
