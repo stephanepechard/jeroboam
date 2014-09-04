@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 # stdlib
-import configparser
 from logging.handlers import RotatingFileHandler
 import logging
 import mimetypes
@@ -21,7 +20,7 @@ if not os.path.exists(VENV_PIP):
     print("Create virtual environment, this should happen only once.")
     try:
         subprocess.call(['pyvenv', VENV_PATH])  # needs pyvenv in PATH
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         subprocess.call(['virtualenv', VENV_PATH])  # needs virtualenv in PATH
     subprocess.call([VENV_PIP, '--quiet', 'install'] + PACKAGES)
 
@@ -31,8 +30,11 @@ if not VENV_PYTHON == sys.executable:
 
 
 ## Now begins the code using virtual environment
+try:
+    import configparser  # python3
+except ImportError:
+    import ConfigParser as configparser  # python2
 from PIL import Image
-#import bottle
 # constants
 APP_NAME = 'jeroboam'
 CONFIG_FILE = 'config.ini'
