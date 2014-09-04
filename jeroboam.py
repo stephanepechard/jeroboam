@@ -19,7 +19,10 @@ PACKAGES += ['ipdb']  # dev packages
 
 if not os.path.exists(VENV_PIP):
     print("Create virtual environment, this should happen only once.")
-    subprocess.call(['pyvenv', VENV_PATH])  # needs pyvenv in PATH
+    try:
+        subprocess.call(['pyvenv', VENV_PATH])  # needs pyvenv in PATH
+    except FileNotFoundError as e:
+        subprocess.call(['virtualenv', VENV_PATH])  # needs virtualenv in PATH
     subprocess.call([VENV_PIP, '--quiet', 'install'] + PACKAGES)
 
 if not VENV_PYTHON == sys.executable:
