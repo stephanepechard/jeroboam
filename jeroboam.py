@@ -103,7 +103,7 @@ class Jeroboam:
                     path = os.path.join(subdir, file)
                     cache_path = os.path.join(cache_dir, file)
                     mimetype = mimetypes.guess_type(file)
-                    if mimetype and not os.path.exists(cache_path):
+                    if mimetype and mimetype[0] and not os.path.exists(cache_path):
                         filetype = mimetype[0].split('/')[0]
                         if filetype == 'image':
                             self.log.info("Caching: " + cache_path)
