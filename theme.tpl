@@ -74,7 +74,7 @@
             % for pic in pictures:
                 % pic_text = pic.split('/')[-1]
                 <div class="picture">
-                    <a data-imagelightbox="X" href="/{{pic}}"><img src="cache/{{pic}}" /></a><br />{{pic_text}}
+                    <a data-imagelightbox="X" href="/{{pic}}"><img src="/cache/{{pic}}" /></a><br />{{pic_text}}
                 </div>
             % end
             % if not pictures:
@@ -84,7 +84,7 @@
     </div>
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="imagelightbox.min.js"></script>
+    <script src="/imagelightbox.min.js"></script>
     <script>
         $( function() {
 		    overlayOn = function() { $( '<div id="imagelightbox-overlay"></div>' ).appendTo( 'body' ); },
