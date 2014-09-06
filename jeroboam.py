@@ -87,6 +87,7 @@ class Jeroboam:
         size = (int(self.config.get('DEFAULT', 'thumbnail_size')),
                 int(int(self.config.get('DEFAULT', 'thumbnail_size')) * 1.618))
         for subdir, dirs, files in os.walk(self.config.get('DEFAULT', 'directory')):
+            nb_files += len(files)
             # recreate dirs
             cache_dir = None
             if subdir.startswith(self.config.get('DEFAULT', 'directory')):
@@ -100,19 +101,20 @@ class Jeroboam:
             # recreate thumbnails
             for file in files:
                 if file.split('.')[-1].lower() in SUPPORTED_EXTENSIONS:
-                    path = os.path.join(subdir, file)
                     cache_path = os.path.join(cache_dir, file)
-                    mimetype = mimetypes.guess_type(file)
-                    if mimetype and mimetype[0] and mimetype[0].split('/')[0] == 'image' and not os.path.exists(cache_path):
-                        self.log.info("Caching: " + cache_path)
-                        try:
-                            im = Image.open(path)
-                            im.thumbnail(size, Image.BICUBIC)
-                            im.save(cache_path, im.format)
-                            nb_cache_files += 1
-                        except IOError:
-                            self.log.info('Error while opening: ' + file)
-                    nb_files += 1
+                    if not os.path.exists(cache_path):
+                        path = os.path.join(subdir, file)
+                        mimetype = mimetypes.guess_type(file)
+                        if mimetype and mimetype[0] and \
+                           mimetype[0].split('/')[0] == 'image' and not os.path.exists(cache_path):
+                            self.log.info("Caching: " + file)
+                            try:
+                                im = Image.open(path)
+                                im.thumbnail(size, Image.BICUBIC)
+                                im.save(cache_path, im.format)
+                                nb_cache_files += 1
+                            except IOError:
+                                self.log.info('Error while opening: ' + file)
                 else:
                     self.log.info('Not a supported image file: ' + file)
 
