@@ -82,43 +82,35 @@ class Jeroboam:
             os.mkdir(CACHE_DIR)
             self.log.info("Creating cache directories.")
 
-        nb_files = 0
-        nb_cache_files = 0
         size = (int(self.config.get('DEFAULT', 'thumbnail_size')),
                 int(int(self.config.get('DEFAULT', 'thumbnail_size')) * 1.618))
         for subdir, dirs, files in os.walk(self.config.get('DEFAULT', 'directory')):
-            nb_files += len(files)
             # recreate dirs
-            cache_dir = None
-            if subdir.startswith(self.config.get('DEFAULT', 'directory')):
-                length = len(self.config.get('DEFAULT', 'directory')) + 1
-                self.tree.append(subdir[length:])
-                cache_dir = os.path.join(CACHE_DIR, subdir[length:])
-                if not os.path.exists(cache_dir):
-                    os.mkdir(cache_dir)
-                    self.log.info("Creating cache dir: " + cache_dir)
+            length = len(self.config.get('DEFAULT', 'directory')) + 1
+            path = subdir[length:]
+            cache_dir = os.path.join(CACHE_DIR, path)
+            if not os.path.exists(cache_dir):
+                os.mkdir(cache_dir)
+                self.log.info("Creating cache dir: " + cache_dir)
 
             # recreate thumbnails
+            nb_files = 0
             for file in files:
                 if file.split('.')[-1].lower() in SUPPORTED_EXTENSIONS:
-                    cache_path = os.path.join(cache_dir, file)
-                    if not os.path.exists(cache_path):
-                        path = os.path.join(subdir, file)
-                        mimetype = mimetypes.guess_type(file)
-                        if mimetype and mimetype[0] and \
-                           mimetype[0].split('/')[0] == 'image' and not os.path.exists(cache_path):
-                            self.log.info("Caching: " + file)
-                            try:
-                                im = Image.open(path)
-                                im.thumbnail(size, Image.BICUBIC)
-                                im.save(cache_path, im.format)
-                                nb_cache_files += 1
-                            except IOError:
-                                self.log.info('Error while opening: ' + file)
-                else:
-                    self.log.info('Not a supported image file: ' + file)
+                    nb_files += 1
+                    cache_file = os.path.join(cache_dir, file)
+                    if not os.path.exists(cache_file):
+                        try:
+                            im = Image.open(os.path.join(subdir, file))
+                            im.thumbnail(size)
+                            im.save(cache_file, im.format)
+                            nb_files += 1
+                        except IOError:
+                            self.log.info('Error while opening: ' + os.path.join(subdir, file))
 
-        self.log.info(str(nb_files) + " files found - " + str(nb_cache_files) + " files cached")
+            # show directory only if supported files in it
+            if nb_files:
+                self.tree.append(path)
 
     def run_bottle(self):
         from bottle import route, run, static_file, view
@@ -145,8 +137,8 @@ class Jeroboam:
                 full_path = os.path.join(self.config.get('DEFAULT', 'directory'), path)
                 return static_file(os.path.basename(pic_path), root=os.path.dirname(full_path))
 
-        subprocess.Popen(['open', 'http://127.0.0.1:8080/'])
-        run(debug=True)
+        subprocess.Popen(['open', 'http://0.0.0.0:8080'])
+        run(host='0.0.0.0', debug=True)
 
 
 def log():
