@@ -77,9 +77,6 @@
                     <a data-imagelightbox="X" href="/{{pic}}"><img src="/cache/{{pic}}" /></a><br />{{pic_text}}
                 </div>
             % end
-            % if not pictures:
-                <div id="nopictures">No picture in this directory.</div>
-            % end
 	    </div>
     </div>
 
