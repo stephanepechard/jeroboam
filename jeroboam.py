@@ -8,12 +8,13 @@ import mimetypes
 import os
 import subprocess
 import sys
+from threading import Thread
 
 # create virtualenv before importing pipped package
 VENV_PATH = os.path.join(os.getcwd(), 'venv')
 VENV_PYTHON = os.path.join(VENV_PATH, 'bin', 'python')
 VENV_PIP = os.path.join(VENV_PATH, 'bin', 'pip')
-PACKAGES = ['bottle', 'pillow']  # + watchdog to update cache on-the-fly
+PACKAGES = ['bottle', 'exifread', 'pillow']  # + watchdog to update cache on-the-fly
 PACKAGES += ['ipdb']  # dev packages
 
 if not os.path.exists(VENV_PIP):
@@ -38,6 +39,7 @@ try:
    input = raw_input  # python2
 except NameError:
    pass  # python3
+import exifread
 from PIL import Image
 # constants
 APP_NAME = 'jeroboam'
@@ -45,6 +47,12 @@ CONFIG_FILE = 'config.ini'
 CACHE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cache')
 THUMBNAIL_SIZE = '150'  # default
 SUPPORTED_EXTENSIONS = ['gif', 'jpg', 'jpeg', 'png']
+ROTATION = {
+    'Horizontal (normal)': 0, 'Mirrored horizontal': 0,
+    'Rotated 180': 180, 'Mirrored vertical': 0,
+    'Mirrored horizontal then rotated 90 CCW': 270, 'Rotated 90 CCW': 270,
+    'Mirrored horizontal then rotated 90 CW': 90, 'Rotated 90 CW': 90
+}
 
 class Jeroboam:
     def __init__(self, logger):
@@ -83,35 +91,45 @@ class Jeroboam:
             self.log.info("Creating cache directories.")
 
         size = (int(self.config.get('DEFAULT', 'thumbnail_size')),
-                int(int(self.config.get('DEFAULT', 'thumbnail_size')) * 1.618))
+                int(self.config.get('DEFAULT', 'thumbnail_size')))
+                #int(int(self.config.get('DEFAULT', 'thumbnail_size')) * 1.618))
         for subdir, dirs, files in os.walk(self.config.get('DEFAULT', 'directory')):
             # recreate dirs
             length = len(self.config.get('DEFAULT', 'directory')) + 1
             path = subdir[length:]
+            self.tree.append(path)
             cache_dir = os.path.join(CACHE_DIR, path)
             if not os.path.exists(cache_dir):
                 os.mkdir(cache_dir)
-                self.log.info("Creating cache dir: " + cache_dir)
+                #self.log.info("Creating cache dir: " + cache_dir)
+
+            if not (subdir == '/home/stephane/data/images/Incoming/Canon EOS 350D'):
+                continue
 
             # recreate thumbnails
-            nb_files = 0
-            for file in files:
-                if file.split('.')[-1].lower() in SUPPORTED_EXTENSIONS:
-                    nb_files += 1
-                    cache_file = os.path.join(cache_dir, file)
-                    if not os.path.exists(cache_file):
-                        try:
-                            im = Image.open(os.path.join(subdir, file))
-                            im.thumbnail(size)
-                            im.save(cache_file, im.format)
-                            nb_files += 1
-                        except IOError:
-                            self.log.info('Error while opening: ' + os.path.join(subdir, file))
-
+            for file_name in files:
+                #Thread(target=self.create_thumbnail, args=(cache_dir, file_name, subdir, size,)).start()
+                self.create_thumbnail(cache_dir, file_name, subdir, size)
             # show directory only if supported files in it
-            if nb_files:
-                self.tree.append(path)
+            #if nb_files:
+            #    self.tree.append(path)
 
+    def create_thumbnail(self, cache_dir, file_name, subdir, size):
+        cache_file = os.path.join(cache_dir, file_name)
+        if file_name.split('.')[-1].lower() in SUPPORTED_EXTENSIONS and not os.path.exists(cache_file):
+            with open(os.path.join(subdir, file_name)) as picture:
+                try:
+                    tags = exifread.process_file(picture)
+                    angle = ROTATION[tags['Image Orientation'].printable] if 'Image Orientation' in tags.keys() else 0
+                    im = Image.open(picture)
+                    rot = im.rotate(angle)
+                    rot.thumbnail(size)
+                    rot.save(cache_file, im.format)
+                    self.log.info('Caching: ' + file_name)
+                    #nb_files += 1
+                except IOError:
+                    self.log.info('Error while opening: ' + os.path.join(subdir, file_name))
+            
     def run_bottle(self):
         from bottle import route, run, static_file, view
 
@@ -132,7 +150,7 @@ class Jeroboam:
             pic_path = os.path.join(CACHE_DIR, path)
             if os.path.isdir(pic_path):
                 pictures = [os.path.join(path, pic) for pic in os.listdir(pic_path) if os.path.isfile(os.path.join(pic_path, pic))]
-                return dict(tree=self.tree, pictures=pictures)
+                return dict(tree=self.tree, pictures=sorted(pictures) if pictures else [])
             else:
                 full_path = os.path.join(self.config.get('DEFAULT', 'directory'), path)
                 return static_file(os.path.basename(pic_path), root=os.path.dirname(full_path))
@@ -140,7 +158,7 @@ class Jeroboam:
         subprocess.Popen(['open', 'http://0.0.0.0:8080'])
         run(host='0.0.0.0', debug=True)
 
-
+        
 def log():
     """ The app logger """
     logger = logging.getLogger(APP_NAME)
