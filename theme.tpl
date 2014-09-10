@@ -26,7 +26,7 @@
                           border-radius: 10px 10px 10px 10px; -moz-border-radius: 10px 10px 10px 10px; -webkit-border-radius: 10px 10px 10px 10px; }
 
             /* imagelightbox */
-            #main img { margin:1em; border:0.5em solid #444; }
+            #main img { margin:1em; border:2px solid #DDD; }
             #main img:hover, #main img:focus { border-color: #DDD; }
 
             #imagelightbox { cursor:pointer; position:fixed; z-index:10000; -ms-touch-action:none; touch-action:none; }
@@ -74,7 +74,8 @@
             % for pic in pictures:
                 % pic_text = pic.split('/')[-1]
                 <div class="picture">
-                    <a data-imagelightbox="X" href="/{{pic}}"><img src="/cache/{{pic}}" /></a><br />{{pic_text}}
+                    <a data-imagelightbox="X" href="/{{pic}}"><img src="/cache/{{pic}}" /></a>
+                    <!-- <br />{{pic_text}} -->
                 </div>
             % end
         </div>

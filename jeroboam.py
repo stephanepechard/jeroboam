@@ -45,7 +45,7 @@ from PIL import Image
 APP_NAME = 'jeroboam'
 CONFIG_FILE = 'config.ini'
 CACHE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cache')
-THUMBNAIL_SIZE = '150'  # default
+THUMBNAIL_SIZE = '200'  # default
 SUPPORTED_EXTENSIONS = ['gif', 'jpg', 'jpeg', 'png']
 ROTATION = {
     'Horizontal (normal)': 0, 'Mirrored horizontal': 0,
@@ -103,9 +103,6 @@ class Jeroboam:
                 os.mkdir(cache_dir)
                 #self.log.info("Creating cache dir: " + cache_dir)
 
-            if not (subdir == '/home/stephane/data/images/Incoming/Canon EOS 350D'):
-                continue
-
             # recreate thumbnails
             for file_name in files:
                 #Thread(target=self.create_thumbnail, args=(cache_dir, file_name, subdir, size,)).start()
@@ -117,19 +114,35 @@ class Jeroboam:
     def create_thumbnail(self, cache_dir, file_name, subdir, size):
         cache_file = os.path.join(cache_dir, file_name)
         if file_name.split('.')[-1].lower() in SUPPORTED_EXTENSIONS and not os.path.exists(cache_file):
-            with open(os.path.join(subdir, file_name)) as picture:
+            # determine orientation angle
+            angle = 0
+            file_path = os.path.join(subdir, file_name)
+            with open(file_path, 'rb') as picture:
                 try:
                     tags = exifread.process_file(picture)
-                    angle = ROTATION[tags['Image Orientation'].printable] if 'Image Orientation' in tags.keys() else 0
-                    im = Image.open(picture)
-                    rot = im.rotate(angle)
-                    rot.thumbnail(size)
-                    rot.save(cache_file, im.format)
-                    self.log.info('Caching: ' + file_name)
-                    #nb_files += 1
-                except IOError:
-                    self.log.info('Error while opening: ' + os.path.join(subdir, file_name))
-            
+                    angle = ROTATION[tags['Image Orientation'].printable]
+                    self.log.info('Rotating by angle: ' + str(angle))
+                except UnicodeDecodeError:
+                    self.log.info('Error while querying orientation of: ' + file_path)
+                except KeyError:
+                    self.log.info('No EXIF tags found for: ' + file_path)
+
+            try:
+                im = Image.open(file_path)
+                rot = im.rotate(angle)
+                # make it square
+                w, h = rot.size
+                offset = min(rot.size)/2
+                box = [int(w/2 - offset), int(h/2 - offset), int(w/2 + offset), int(h/2 + offset)]
+                crop = rot.crop(box)
+                crop.thumbnail(size)
+                crop.save(cache_file, rot.format)
+                self.log.info('Caching: ' + file_name)
+            except IOError:
+                self.log.info('Error while opening: ' + file_path)
+            except UnicodeDecodeError:
+                self.log.info('Error while processing: ' + file_path)
+
     def run_bottle(self):
         from bottle import route, run, static_file, view
 
@@ -152,13 +165,13 @@ class Jeroboam:
                 pictures = [os.path.join(path, pic) for pic in os.listdir(pic_path) if os.path.isfile(os.path.join(pic_path, pic))]
                 return dict(tree=self.tree, pictures=sorted(pictures) if pictures else [])
             else:
-                full_path = os.path.join(self.config.get('DEFAULT', 'directory'), path)
-                return static_file(os.path.basename(pic_path), root=os.path.dirname(full_path))
+                dir_path = os.path.join(self.config.get('DEFAULT', 'directory'), path)
+                return static_file(os.path.basename(pic_path), root=os.path.dirname(dir_path))
 
         subprocess.Popen(['open', 'http://0.0.0.0:8080'])
         run(host='0.0.0.0', debug=True)
 
-        
+
 def log():
     """ The app logger """
     logger = logging.getLogger(APP_NAME)
