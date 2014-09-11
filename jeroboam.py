@@ -175,7 +175,6 @@ class Jeroboam:
                 return dict(tree=self.tree, date=NOW,
                             pictures=None, message="This directory don't even exist...")
 
-        subprocess.Popen(['open', 'http://0.0.0.0:8080'])
         run(host='0.0.0.0')
 
 
