@@ -18,6 +18,7 @@ Go to the `http://0.0.0.0:8080` address in your browser. And voilà, it's done!
 
 # Like it? Hate it? Don't care?
 
+Jeroboam is at very early develoment stage.
 Feel free to enjoy at, ask for or complain about anything through
 [Github issues](https://github.com/stephanepechard/jeroboam/issues).
 
