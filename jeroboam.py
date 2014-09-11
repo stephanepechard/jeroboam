@@ -181,16 +181,11 @@ class Jeroboam:
 def log():
     """ The app logger """
     logger = logging.getLogger(APP_NAME)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.WARN)
 
     formatter = logging.Formatter('%(asctime)s :: %(levelname)s :: %(message)s')
-    file_handler = RotatingFileHandler('/tmp/' + APP_NAME + '.log', 'a', 1000000, 1)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-
     stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.DEBUG)
+    stream_handler.setLevel(logging.WARN)
     stream_handler.setFormatter(formatter)
     logger.addHandler(stream_handler)
 
