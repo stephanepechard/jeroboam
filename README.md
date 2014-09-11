@@ -27,5 +27,6 @@ Feel free to enjoy at, ask for or complain about anything through
 
 Jeroboam uses some external tools, to light its use:
 
+- [Bottle](http://bottlepy.org/), to serve the service easily ;
 - [Lightbox2](https://github.com/lokesh/lightbox2), to enjoy fullscreen pictures ;
 - [Google Fonts](https://www.google.com/fonts), to style stuff a bit.
