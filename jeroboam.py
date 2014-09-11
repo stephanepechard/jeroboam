@@ -7,13 +7,13 @@ import logging
 import os
 import subprocess
 import sys
+from time import strftime
 
 # create virtualenv before importing pipped package
 VENV_PATH = os.path.join(os.getcwd(), 'venv')
 VENV_PYTHON = os.path.join(VENV_PATH, 'bin', 'python')
 VENV_PIP = os.path.join(VENV_PATH, 'bin', 'pip')
 PACKAGES = ['bottle', 'exifread', 'pillow']  # + watchdog to update cache on-the-fly
-PACKAGES += ['ipdb']  # dev packages
 
 if not os.path.exists(VENV_PIP):
     print("Create virtual environment, this should happen only once.")
@@ -45,6 +45,7 @@ APP_NAME = 'jeroboam'
 CONFIG_FILE = 'config.ini'
 CACHE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cache')
 THUMBNAIL_SIZE = '200'  # default
+NOW = strftime("%Y-%m-%d %H:%M:%S")
 SUPPORTED_EXTENSIONS = ['bmp', 'gif', 'jpg', 'jpeg', 'png']
 ROTATION = {
     'Horizontal (normal)': 0, 'Mirrored horizontal': 0,
@@ -159,20 +160,20 @@ class Jeroboam:
         @route('/:path#.*#')
         @view('theme')
         def index(path):
-            #import ipdb;ipdb.set_trace()
             full_path = os.path.join(CACHE_DIR, path)
             if os.path.exists(full_path):
                 if os.path.isdir(full_path):
                     # list pictures files of the given directory
                     pictures = [os.path.join(path, pic) for pic in os.listdir(full_path) if os.path.isfile(os.path.join(full_path, pic))]
-                    return dict(tree=self.tree,
+                    return dict(tree=self.tree, date=NOW,
                                 pictures=sorted(pictures) if pictures else None,
                                 message="This directory is empty.")
                 else:
                     dir_path = os.path.join(self.config.get('DEFAULT', 'directory'), path)
                     return static_file(os.path.basename(full_path), root=os.path.dirname(dir_path))
             else:
-                return dict(tree=self.tree, pictures=None, message="This directory don't even exist...")
+                return dict(tree=self.tree, date=NOW,
+                            pictures=None, message="This directory don't even exist...")
 
         subprocess.Popen(['open', 'http://0.0.0.0:8080'])
         run(host='0.0.0.0')
