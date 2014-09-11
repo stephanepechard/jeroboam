@@ -7,50 +7,29 @@
         <link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Lato:300|Open+Sans+Condensed:300'>
         <link rel='stylesheet' type='text/css' href='//cdnjs.cloudflare.com/ajax/libs/lightbox2/2.7.1/css/lightbox.css'>
         <style type="text/css">
-            html { -ms-touch-action: manipulation; touch-action: manipulation; }
-            body { background:#222; color:#DDD; margin:0; padding:0; border:0; width:100%; font-family: 'Lato', sans-serif; }
+            html { -ms-touch-action:manipulation; touch-action:manipulation; }
+            body { background:#222; color:#DDD; margin:0; padding:0; border:0; width:100%; font-family:'Lato', sans-serif; }
             #main { clear:both; margin:0px; padding:0px; }
             #main:before, #main:after { content:""; display:table; }
             #main:after { clear:both; }
-            .column { display: block; float:left; margin: 0 1%; }
+            .column { display:block; float:left; margin:0 1em; }
             #left { width: 20%; padding:1em 0; background-color:#444; }
             #left ul { list-style:none; margin:2em 1em; padding:0; }
-            #left ul li { margin-bottom:1em; list-style-position:inside; white-space: nowrap;
-                          overflow: hidden; text-overflow: ellipsis; }
+            #left ul li { margin-bottom:1em; list-style-position:inside; white-space:nowrap;
+                          overflow:hidden; text-overflow:ellipsis; }
             #left ul li a { color:#DDD; text-decoration:none; }
-            header { text-align:center; font-size:30px; font-family: 'Open Sans Condensed', sans-serif; }
-            footer { text-align:center; font-size:12px; }
-            header a, footer a { color:#DDD; text-decoration:none; }
-            #right { width: 76%; margin-top:1em; }
-            .picture { text-align:center; display:-moz-box; }
-            #message { text-align:center; margin:3em; font-size:2em; background-color:#444; height: 3em;
-                          border-radius: 10px 10px 10px 10px; -moz-border-radius: 10px 10px 10px 10px; -webkit-border-radius: 10px 10px 10px 10px; }
-
-            /* imagelightbox */
-            #main img { margin:1em; border:2px solid #DDD; }
-            #main img:hover, #main img:focus { border-color: #DDD; }
-
-            #imagelightbox { cursor:pointer; position:fixed; z-index:10000; -ms-touch-action:none; touch-action:none; }
-            #imagelightbox-overlay { background-color:rgba( 80, 80, 80, .9 ); position:fixed; z-index:9998; top:0; right:0; bottom:0; left:0; }
-
-            #imagelightbox-close { width:2.5em; height:2.5em; text-align:left; background-color:#666; border-radius:50%; position:fixed; z-index:10002; top: 2.5em; right: 2.5em; -webkit-transition: color .3s ease; transition: color .3s ease; }
-            #imagelightbox-close:hover, #imagelightbox-close:focus { background-color: #111; }
-            #imagelightbox-close:before, #imagelightbox-close:after { width: 2px; background-color: #fff; content: ''; position: absolute;
-                                                                      top: 20%; bottom: 20%; left: 50%; margin-left: -1px; }
-            #imagelightbox-close:before { -webkit-transform: rotate( 45deg ); -ms-transform: rotate( 45deg ); transform: rotate( 45deg ); }
-            #imagelightbox-close:after { -webkit-transform: rotate( -45deg ); -ms-transform: rotate( -45deg ); transform: rotate( -45deg ); }
-
-            #imagelightbox-overlay, #imagelightbox-close { -webkit-animation: fade-in .25s linear; animation: fade-in .25s linear; }
-            @-webkit-keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-            @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-
+            header { text-align:center; font-size:30px; font-family:'Open Sans Condensed', sans-serif; }
+            footer { text-align:center; font-size:12px; padding:1em; }
+            header a, footer a { color:#DDD; text-align:center; text-decoration:none; }
+            #right { width:76%; margin:1em 0; text-align:center; }
+            .picture { float:left; margin:1em; padding:0; }
+            .picture img { -moz-border-radius:15px; border-radius:15px; }
+            #message { background-color:#444; -moz-border-radius:15px; border-radius:15px;
+                       font-size:2em; margin:3em; padding:5% 0; text-align:center; }
             @media only screen and (max-width: 480px) {
-                .col { margin: 1% 0; }
-                #left, #right { width: 100%; }
-                #main { width: 100%; }
-                #imagelightbox-close { top: 1.25em; right: 1.25em; }
+                .col { margin:1% 0; }
+                #main, #left, #right { width:100%; }
             }
-
         </style>
     </head>
     <body>
@@ -68,7 +47,11 @@
                         % else:
                             <li title="Empty directory">
                         % end
+                        % if folder_text:
                             {{!space}}{{folder_text}}
+                        % else:
+                            ~
+                        % end
                         % if dico['nbfiles']:
                             </a>
                         % end
@@ -76,20 +59,18 @@
                     % end
                 % end
             </ul>
-            % from time import strftime
-            % date = strftime("%Y-%m-%d %H:%M:%S")
-            <footer><a href="http://github.com">Generated by Jeroboam on {{date}}.</a></footer>
+            <footer><a href="https://github.com/stephanepechard/jeroboam">Generated by Jeroboam on {{date}}</a></footer>
         </div>
         <div id="right" class="column">
             % if pictures:
                 % for pic in pictures:
                     % pic_text = pic.split('/')[-1]
-                    <div class="picture">
+                    <div class="picture appbox">
                         <a href="/{{pic}}" data-lightbox="lb" data-title="{{pic_text}}"><img src="/cache/{{pic}}" /></a>
                     </div>
                 % end
             % else:
-                <div id="message">{{message}}</div>
+                <div id="message"><div style="padding:10% 0;">{{message}}</div></div>
             % end
         </div>
     </div>
