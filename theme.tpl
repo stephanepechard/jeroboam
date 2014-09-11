@@ -4,7 +4,8 @@
         <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
         <title>Jeroboam</title>
         <meta name="author" content="Jeroboam" />
-        <link href='http://fonts.googleapis.com/css?family=Lato:300|Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+        <link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Lato:300|Open+Sans+Condensed:300'>
+        <link rel='stylesheet' type='text/css' href='//cdnjs.cloudflare.com/ajax/libs/lightbox2/2.7.1/css/lightbox.css'>
         <style type="text/css">
             html { -ms-touch-action: manipulation; touch-action: manipulation; }
             body { background:#222; color:#DDD; margin:0; padding:0; border:0; width:100%; font-family: 'Lato', sans-serif; }
@@ -84,8 +85,7 @@
                 % for pic in pictures:
                     % pic_text = pic.split('/')[-1]
                     <div class="picture">
-                        <a data-imagelightbox="X" href="/{{pic}}"><img src="/cache/{{pic}}" /></a>
-                        <!-- <br />{{pic_text}} -->
+                        <a href="/{{pic}}" data-lightbox="lb" data-title="{{pic_text}}"><img src="/cache/{{pic}}" /></a>
                     </div>
                 % end
             % else:
@@ -94,25 +94,7 @@
         </div>
     </div>
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="/imagelightbox.min.js"></script>
-    <script>
-        $( function() {
-            overlayOn = function() { $( '<div id="imagelightbox-overlay"></div>' ).appendTo( 'body' ); },
-            overlayOff = function() { $( '#imagelightbox-overlay' ).remove(); },
-            closeButtonOn = function( instance ) {
-                $( '<button type="button" id="imagelightbox-close" title="Close"></button>' ).appendTo('body').on('click touchend', function(){ $(this).remove(); instance.quitImageLightbox(); return false; });
-            },
-            closeButtonOff = function() { $( '#imagelightbox-close' ).remove(); }
-
-            var selector = 'a[data-imagelightbox="X"]';
-            var instance = $( selector ).imageLightbox({
-                quitOnImgClick: false,
-                onStart: function() { overlayOn(); closeButtonOn(instance); },
-                onEnd:   function() { overlayOff(); closeButtonOff(); }
-            });
-        });
-    </script>
-
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/lightbox2/2.7.1/js/lightbox.min.js"></script>
     </body>
 </html>
