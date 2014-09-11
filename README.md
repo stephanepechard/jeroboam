@@ -3,6 +3,7 @@
 **Jeroboam** is a photo gallery creator, leaving your pictures where they are.
 No need to upload them and make a redondant copy as usual gallery software do.
 With a single script, create your own gallery in one call.
+Should work flawlessly under Linux and Mac OS, use Windows at your own risks.
 
 
 # Usage
