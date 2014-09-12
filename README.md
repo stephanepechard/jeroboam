@@ -10,7 +10,7 @@ Should work flawlessly under Linux and Mac OS, use Windows at your own risks.
 
 Call:
 
-	jeroboam
+	./jeroboam.py
 
 from its installation directory. It asks you for a directory where your pictures are.
 It will use the associated theme file `theme.tpl` file to start a webservice.
