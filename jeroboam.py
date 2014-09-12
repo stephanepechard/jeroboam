@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 # stdlib
-from logging.handlers import RotatingFileHandler
 import logging
 import os
 import subprocess
@@ -179,7 +178,6 @@ class Jeroboam:
 
 
 def log():
-    """ The app logger """
     logger = logging.getLogger(APP_NAME)
     logger.setLevel(logging.WARN)
 
@@ -193,7 +191,6 @@ def log():
 
 
 def main():
-    """ Main function. """
     jeroboam = Jeroboam(log())
     jeroboam.init()
     jeroboam.run_bottle()
