@@ -12,7 +12,7 @@ from time import strftime
 VENV_PATH = os.path.join(os.getcwd(), 'venv')
 VENV_PYTHON = os.path.join(VENV_PATH, 'bin', 'python')
 VENV_PIP = os.path.join(VENV_PATH, 'bin', 'pip')
-PACKAGES = ['bottle', 'exifread', 'pillow']  # + watchdog to update cache on-the-fly
+PACKAGES = ['bottle', 'exifread', 'pillow']
 
 if not os.path.exists(VENV_PIP):
     print("Create virtual environment, this should happen only once.")
@@ -27,15 +27,15 @@ if not VENV_PYTHON == sys.executable:
     sys.exit(0)  # to stop here the non-virtual environment
 
 
-## Now begins the code using virtual environment
+# Now begins the code using virtual environment
 try:
     import configparser  # python3
 except ImportError:
     import ConfigParser as configparser  # python2
 try:
-   input = raw_input  # python2
+    input = raw_input  # python2
 except NameError:
-   pass  # python3
+    pass  # python3
 from bottle import route, run, static_file, view
 import exifread
 from PIL import Image
@@ -66,17 +66,20 @@ class Jeroboam:
 
     def get_config(self):
         if not os.path.exists(CONFIG_FILE):
-            self.log.info("Config file does not exist, ask user to create one.")
+            self.log.info("""Config file does not exist,
+                             ask user to create one.""")
             self.create_config()
         else:
             self.config.read(CONFIG_FILE)
             # check config integrity
             if not os.path.exists(self.config.get('DEFAULT', 'directory')):
-                self.log.error("Picture directory do not exist. You need one to use Jeroboam.")
+                self.log.error("""Picture directory do not exist.
+                                  You need one to use Jeroboam.""")
                 sys.exit(1)
 
     def create_config(self):
-        directory = input("Please, specify the directory where your pictures are: ")
+        directory = input("""Please, specify the directory
+                             where your pictures are: """)
         self.config.set('DEFAULT', 'directory', directory)
         self.config.set('DEFAULT', 'thumbnail_size', THUMBNAIL_SIZE)
 
@@ -92,7 +95,8 @@ class Jeroboam:
 
         size = (int(self.config.get('DEFAULT', 'thumbnail_size')),
                 int(self.config.get('DEFAULT', 'thumbnail_size')))
-        for subdir, dirs, files in os.walk(self.config.get('DEFAULT', 'directory')):
+        for subdir, dirs, files in os.walk(self.config.get('DEFAULT',
+                                                           'directory')):
             # recreate dirs
             length = len(self.config.get('DEFAULT', 'directory')) + 1
             path = subdir[length:]
@@ -105,12 +109,13 @@ class Jeroboam:
             nbfiles = 0
             for file_name in files:
                 if file_name.split('.')[-1].lower() in SUPPORTED_EXTENSIONS:
-                    #Thread(target=self.create_thumbnail, args=(cache_dir, file_name, subdir, size,)).start()
                     self.create_thumbnail(cache_dir, file_name, subdir, size)
                     nbfiles += 1
 
             # create tree to be shown
-            self.tree.append({'path': path, 'nbdirs': len(dirs), 'nbfiles': nbfiles})
+            self.tree.append({
+                'path': path, 'nbdirs': len(dirs), 'nbfiles': nbfiles
+            })
 
     def create_thumbnail(self, cache_dir, file_name, subdir, size):
         cache_file = os.path.join(cache_dir, file_name)
@@ -124,7 +129,8 @@ class Jeroboam:
                     angle = ROTATION[tags['Image Orientation'].printable]
                     self.log.info('Rotating by angle: ' + str(angle))
                 except UnicodeDecodeError:
-                    self.log.info('Error while querying orientation of: ' + file_path)
+                    self.log.info('Error while querying orientation of: '
+                                  + file_path)
                 except KeyError:
                     self.log.info('No EXIF tags found for: ' + file_path)
 
@@ -134,7 +140,10 @@ class Jeroboam:
                 # make it square
                 w, h = rot.size
                 offset = min(rot.size)/2
-                box = [int(w/2 - offset), int(h/2 - offset), int(w/2 + offset), int(h/2 + offset)]
+                box = [int(w/2 - offset),
+                       int(h/2 - offset),
+                       int(w/2 + offset),
+                       int(h/2 + offset)]
                 crop = rot.crop(box)
                 crop.thumbnail(size)
                 crop.save(cache_file, rot.format)
@@ -147,14 +156,16 @@ class Jeroboam:
     def run_bottle(self):
         @route('/imagelightbox.min.js')
         def imagelightbox():
-            return static_file('imagelightbox.min.js', root=os.path.dirname(__file__))
+            return static_file('imagelightbox.min.js',
+                               root=os.path.dirname(__file__))
 
         @route('/cache/:path#.*#')
         def cache(path):
             pic_path = os.path.join(CACHE_DIR, path)
             if not os.path.isdir(pic_path):
                 full_path = os.path.join(CACHE_DIR, path)
-                return static_file(os.path.basename(pic_path), root=os.path.dirname(full_path))
+                return static_file(os.path.basename(pic_path),
+                                   root=os.path.dirname(full_path))
 
         @route('/:path#.*#')
         @view('theme')
@@ -163,16 +174,20 @@ class Jeroboam:
             if os.path.exists(full_path):
                 if os.path.isdir(full_path):
                     # list pictures files of the given directory
-                    pictures = [os.path.join(path, pic) for pic in os.listdir(full_path) if os.path.isfile(os.path.join(full_path, pic))]
+                    pics = [os.path.join(path, pic)
+                            for pic in os.listdir(full_path)
+                            if os.path.isfile(os.path.join(full_path, pic))]
                     return dict(tree=self.tree, date=NOW,
-                                pictures=sorted(pictures) if pictures else None,
+                                pictures=sorted(pics) if pics else None,
                                 message="This directory is empty.")
                 else:
-                    dir_path = os.path.join(self.config.get('DEFAULT', 'directory'), path)
-                    return static_file(os.path.basename(full_path), root=os.path.dirname(dir_path))
+                    config_dir = self.config.get('DEFAULT', 'directory')
+                    dir_path = os.path.join(config_dir, path)
+                    return static_file(os.path.basename(full_path),
+                                       root=os.path.dirname(dir_path))
             else:
-                return dict(tree=self.tree, date=NOW,
-                            pictures=None, message="This directory don't even exist...")
+                return dict(tree=self.tree, date=NOW, pictures=None,
+                            message="This directory don't even exist...")
 
         run(host='0.0.0.0')
 
@@ -181,7 +196,8 @@ def log():
     logger = logging.getLogger(APP_NAME)
     logger.setLevel(logging.WARN)
 
-    formatter = logging.Formatter('%(asctime)s :: %(levelname)s :: %(message)s')
+    log_format = '%(asctime)s :: %(levelname)s :: %(message)s'
+    formatter = logging.Formatter(log_format)
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.WARN)
     stream_handler.setFormatter(formatter)
